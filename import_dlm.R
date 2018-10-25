@@ -36,15 +36,17 @@ ffdb_import <- function (template_name, document_name, instance = 'ffdb.farfish.
 
 # Fetch an FFDB "dlmtool" document, and convert it into a DLMtool Data object
 ffdb_to_dlmtool <- function (document_name, instance = 'ffdb.farfish.eu') {
+    null_to_na <- function (x) { ifelse(is.null(x), NA, x) }
+
     doc <- ffdb_import('dlmtool', document_name, instance = instance)
 
     out <- new('Data')
     
     # metadata
     out@Name <- document_name
-    out@Common_Name <- doc$metadata[1, "case_study"]
-    out@Species <- doc$metadata[1, "species"]
-    out@Region <- doc$metadata[1, "location"]
+    out@Common_Name <- as.character(doc$metadata[1, "case_study"])
+    out@Species <- as.character(doc$metadata[1, "species"])
+    out@Region <- as.character(doc$metadata[1, "location"])
 
     # catch
     out@Year <- as.numeric(rownames(doc$catch))
@@ -79,26 +81,26 @@ ffdb_to_dlmtool <- function (document_name, instance = 'ffdb.farfish.eu') {
     out@vbK <- doc$constants[1, "Von_Bertalanffy_K"]
     out@vbLinf <- doc$constants[1, "Von_Bertalanffy_Linf"]
     out@vbt0 <- doc$constants[1, "Von_Bertalanffy_t0"]
-    out@wla <- doc$constants[1, "Length-weight_parameter_a"]
-    out@wlb <- doc$constants[1, "Length-weight_parameter_b"]
+    out@wla <- null_to_na(doc$constants[1, "Length-weight_parameter_a"])
+    out@wlb <- null_to_na(doc$constants[1, "Length-weight_parameter_b"])
 
     # cv
-    out@CV_Dt <- doc@cv[1, "depletion_over_time"]
-    out@CV_AvC <- doc@cv[1, "avg_catch_over_time"]
-    out@CV_Ind <- doc@cv[1, "abundance_index"]
-    out@CV_Mort <- doc@cv[1, "M"]
-    out@CV_FMSY_M <- doc@cv[1, "FMSY/M"]
-    out@CV_BMSY_B0 <- doc@cv[1, "BMSY/B0"]
-    out@CV_Dep <- doc@cv[1, "current_stock_depletion"]
-    out@CV_Abun <- doc@cv[1, "current_stock_abundance"]
-    out@CV_vbK <- doc@cv[1, "Von_Bertalanffy_K"]
-    out@CV_vbLinf <- doc@cv[1, "Von_Bertalanffy_Linf"]
-    out@CV_vbt0 <- doc@cv[1, "Von_Bertalanffy_t0"]
-    out@CV_L50 <- doc@cv[1, "length_at_50pc_maturity"]
-    out@CV_LFC <- doc@cv[1, "length_at_first_capture"]
-    out@CV_LFS <- doc@cv[1, "length_at_full_selection"]
-    out@CV_wla <- doc@cv[1, "Length-weight_parameter_a"]
-    out@CV_wlb <- doc@cv[1, "Length-weight_parameter_b"]
+    out@CV_Dt <- doc$cv[1, "depletion_over_time"]
+    out@CV_AvC <- doc$cv[1, "avg_catch_over_time"]
+    out@CV_Ind <- doc$cv[1, "abundance_index"]
+    out@CV_Mort <- doc$cv[1, "M"]
+    out@CV_FMSY_M <- null_to_na(doc$cv[1, "FMSY/M"])
+    out@CV_BMSY_B0 <- null_to_na(doc$cv[1, "BMSY/B0"])
+    out@CV_Dep <- doc$cv[1, "current_stock_depletion"]
+    out@CV_Abun <- doc$cv[1, "current_stock_abundance"]
+    out@CV_vbK <- doc$cv[1, "Von_Bertalanffy_K"]
+    out@CV_vbLinf <- doc$cv[1, "Von_Bertalanffy_Linf"]
+    out@CV_vbt0 <- doc$cv[1, "Von_Bertalanffy_t0"]
+    out@CV_L50 <- doc$cv[1, "length_at_50pc_maturity"]
+    out@CV_LFC <- doc$cv[1, "length_at_first_capture"]
+    out@CV_LFS <- doc$cv[1, "length_at_full_selection"]
+    out@CV_wla <- null_to_na(doc$cv[1, "Length-weight_parameter_a"])
+    out@CV_wlb <- null_to_na(doc$cv[1, "Length-weight_parameter_b"])
     # TODO: No equivalent for "Imprecision in length composition data"?
 
     out@MaxAge <- doc$constants[1, "maximum_age"]
