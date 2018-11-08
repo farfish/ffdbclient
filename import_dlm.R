@@ -52,6 +52,7 @@ ffdb_to_dlmtool <- function (document_name, instance = 'ffdb.farfish.eu') {
     out@Year <- as.numeric(rownames(doc$catch))
     out@Cat <- matrix(doc$catch$catch, nrow=1, dimnames = list(c('Cat'), rownames(doc$catch)))
     out@Ind <- matrix(doc$catch$abundance_index, nrow=1, dimnames = list(c('Abun'), rownames(doc$catch)))
+    out@Rec <- matrix(rep(NA, length(doc$catch$abundance_index)), nrow=1, dimnames = list(c('Abun'), rownames(doc$catch)))
     out@t <- ncol(out@Cat)
 
     # constants
@@ -62,6 +63,9 @@ ffdb_to_dlmtool <- function (document_name, instance = 'ffdb.farfish.eu') {
     out@BMSY_B0 <- doc$constants[1, "BMSY.B0"]
     out@L50 <- doc$constants[1, "length_at_50pc_maturity"]
     out@L95 <- doc$constants[1, "length_at_95pc_maturity"]
+    out@ML <- matrix(rep(NA, length(doc$catch$abundance_index)), nrow=1, dimnames = list(c('Abun'), rownames(doc$catch)))
+    out@Lbar <- matrix(rep(NA, length(doc$catch$abundance_index)), nrow=1, dimnames = list(c('Abun'), rownames(doc$catch)))
+    out@Lc <- matrix(rep(NA, length(doc$catch$abundance_index)), nrow=1, dimnames = list(c('Abun'), rownames(doc$catch)))
     out@LFC <- doc$constants[1, "length_at_first_capture"]
     out@LFS <- doc$constants[1, "length_at_full_selection"]
 
