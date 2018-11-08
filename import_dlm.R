@@ -35,103 +35,75 @@ ffdb_import <- function (template_name, document_name, instance = 'ffdb.farfish.
 }
 
 # Fetch an FFDB "dlmtool" document, and convert it into a DLMtool Data object
-ffdb_to_dlmtool <- function (document_name, instance = 'ffdb.farfish.eu') {
-    null_to_na <- function (x) { ifelse(is.null(x), NA, x) }
+ffdb_to_dlmtool_csv <- function (document_name, output = stdout(), instance = 'ffdb.farfish.eu') {
+    null_to_na <- function (x) { ifelse(is.null(x), NA, ifelse(identical(x, "NA"), NA, x)) }
 
     doc <- ffdb_import('dlmtool', document_name, instance = instance)
+    first_line <- TRUE
+    write_line <- function(line_name, x) {
+        cat(line_name, x, "\n", file = output, sep=",", append=!(first_line))
+        first_line <<- FALSE
+    }
 
-    out <- new('Data')
-    
-    # metadata
-    out@Name <- document_name
-    out@Common_Name <- as.character(doc$metadata[1, "case_study"])
-    out@Species <- as.character(doc$metadata[1, "species"])
-    out@Region <- as.character(doc$metadata[1, "location"])
+    write_line('Name', as.character(doc$metadata[1, "species"]))
+    write_line('Year', as.numeric(rownames(doc$catch)))
+    for (i in seq_len(ncol(doc$catch))) {
+        write_line(ifelse(i == 1, 'Catch', 'Abundance index'), as.numeric(doc$catch[,i]))
+    }
+    write_line('Duration t', length(rownames(doc$catch)))
+    write_line('Average catch over time t', mean(doc$catch$catch))
+    write_line('Depletion over time t', doc$constants[1, "depletion_over_time"])
+    write_line('M', doc$constants[1, "M"])
+    write_line('FMSY/M', as.numeric(null_to_na(doc$constants[1, "FMSY.M"])))
+    write_line('BMSY/B0', as.numeric(null_to_na(doc$constants[1, "BMSY.B0"])))
+    write_line('MSY', as.numeric(null_to_na(doc$constants[1, "MSY"])))
+    write_line('BMSY', as.numeric(null_to_na(doc$constants[1, "BMSY"])))
+    write_line('Length at 50% maturity', as.numeric(null_to_na(doc$constants[1, "length_at_50pc_maturity"])))
+    write_line('Length at 95% maturity', as.numeric(null_to_na(doc$constants[1, "length_at_95pc_maturity"])))
+    write_line('Length at first capture', as.numeric(null_to_na(doc$constants[1, "length_at_first_capture"])))
+    write_line('Length at full selection', as.numeric(null_to_na(doc$constants[1, "length_at_full_selection"])))
+    write_line('CAA', as.numeric(NA))  # TODO: What's the format of this?
+    write_line('Current stock depletion', as.numeric(null_to_na(doc$constants[1, "current_stock_depletion"])))
+    write_line('Current stock abundance', as.numeric(null_to_na(doc$constants[1, "current_stock_abundance"])))
+    write_line('Von Bertalanffy K parameter', as.numeric(null_to_na(doc$constants[1, "Von_Bertalanffy_K"])))
+    write_line('Von Bertalanffy Linf parameter', as.numeric(null_to_na(doc$constants[1, "Von_Bertalanffy_Linf"])))
+    write_line('Von Bertalanffy t0 parameter', as.numeric(null_to_na(doc$constants[1, "Von_Bertalanffy_t0"])))
+    write_line('Length-weight parameter a', as.numeric(null_to_na(doc$constants[1, "Length.weight_parameter_a"])))
+    write_line('Length-weight parameter b', as.numeric(null_to_na(doc$constants[1, "Length.weight_parameter_b"])))
+    write_line('Steepness', as.numeric(NA))
+    write_line('Maximum age', as.numeric(null_to_na(doc$constants[1, "maximum_age"])))
+    write_line('CV Catch', as.numeric(null_to_na(doc$cv[1, "catch"])))
+    write_line('CV Depletion over time t', as.numeric(null_to_na(doc$cv[1, "depletion_over_time"])))
+    write_line('CV Average catch over time t', as.numeric(null_to_na(doc$cv[1, "avg_catch_over_time"])))
+    write_line('CV Abundance index', as.numeric(null_to_na(doc$cv[1, "abundance_index"])))
+    write_line('CV M', as.numeric(null_to_na(doc$cv[1, "M"])))
+    write_line('CV FMSY/M', as.numeric(null_to_na(doc$cv[1, "FMSY/M"])))
+    write_line('CV BMSY/B0', as.numeric(null_to_na(doc$cv[1, "BMSY/B0"])))
+    write_line('CV current stock depletion', as.numeric(null_to_na(doc$cv[1, "current_stock_depletion"])))
+    write_line('CV current stock abundance', as.numeric(null_to_na(doc$cv[1, "current_stock_abundance"])))
+    write_line('CV von B. K parameter', as.numeric(null_to_na(doc$cv[1, "Von_Bertalanffy_K"])))
+    write_line('CV von B. Linf parameter', as.numeric(null_to_na(doc$cv[1, "Von_Bertalanffy_Linf"])))
+    write_line('CV von B. t0 parameter', as.numeric(null_to_na(doc$cv[1, "Von_Bertalanffy_t0"])))
+    write_line('CV Length at 50% maturity', as.numeric(null_to_na(doc$cv[1, "length_at_50pc_maturity"])))
+    write_line('CV Length at first capture', as.numeric(null_to_na(doc$cv[1, "length_at_first_capture"])))
+    write_line('CV Length at full selection', as.numeric(null_to_na(doc$cv[1, "length_at_full_selection"])))
+    write_line('CV Length-weight parameter a', as.numeric(null_to_na(doc$cv[1, "Length-weight_parameter_a"])))
+    write_line('CV Length-weight parameter b', as.numeric(null_to_na(doc$cv[1, "Length-weight_parameter_b"])))
+    write_line('CV Steepness', as.numeric(NA))
+    write_line('Sigma length composition', as.numeric(null_to_na(doc$cv[1, "length_composition"])))
+    write_line('Units', 'metric tonnes')
+    write_line('Reference OFL', as.numeric(NA))
+    write_line('Reference OFL type', as.numeric(NA))
+    write_line('CAL_bins', as.numeric(NA))
+    write_line('MPrec', as.numeric(NA))
+    write_line('LHYear', as.numeric(null_to_na(rownames(doc$catch)[[length(rownames(doc$catch))]])))
+}
 
-    # catch
-    out@Year <- as.numeric(rownames(doc$catch))
-    out@Cat <- matrix(doc$catch$catch, nrow=1, dimnames = list(c('Cat'), rownames(doc$catch)))
-    out@Ind <- matrix(doc$catch$abundance_index, nrow=1, dimnames = list(c('Abun'), rownames(doc$catch)))
-    out@Rec <- matrix(rep(NA, length(doc$catch$abundance_index)), nrow=1, dimnames = list(c('Abun'), rownames(doc$catch)))
-    out@t <- ncol(out@Cat)
-
-    # constants
-    out@AvC <- doc$constants[1, "avg_catch_over_time"]
-    out@Dt <- doc$constants[1, "depletion_over_time"]
-    out@Mort <- doc$constants[1, "M"]
-    out@FMSY_M <- doc$constants[1, "FMSY.M"]
-    out@BMSY_B0 <- doc$constants[1, "BMSY.B0"]
-    out@L50 <- doc$constants[1, "length_at_50pc_maturity"]
-    out@L95 <- doc$constants[1, "length_at_95pc_maturity"]
-    out@ML <- matrix(rep(NA, length(doc$catch$abundance_index)), nrow=1, dimnames = list(c('Abun'), rownames(doc$catch)))
-    out@Lbar <- matrix(rep(NA, length(doc$catch$abundance_index)), nrow=1, dimnames = list(c('Abun'), rownames(doc$catch)))
-    out@Lc <- matrix(rep(NA, length(doc$catch$abundance_index)), nrow=1, dimnames = list(c('Abun'), rownames(doc$catch)))
-    out@LFC <- doc$constants[1, "length_at_first_capture"]
-    out@LFS <- doc$constants[1, "length_at_full_selection"]
-
-    # catch-at-age
-    out@CAA <- array(
-        do.call(c, doc$caa),
-        dim = c(
-            # nsim
-            1,
-            # nyears
-            nrow(doc$caa),
-            # MaxAge
-            ncol(doc$caa)))
-
-    out@Dep <- doc$constants[1, "current_stock_depletion"]
-    out@Abun <- doc$constants[1, "current_stock_abundance"]
-    out@vbK <- doc$constants[1, "Von_Bertalanffy_K"]
-    out@vbLinf <- doc$constants[1, "Von_Bertalanffy_Linf"]
-    out@vbt0 <- doc$constants[1, "Von_Bertalanffy_t0"]
-    out@wla <- null_to_na(doc$constants[1, "Length-weight_parameter_a"])
-    out@wlb <- null_to_na(doc$constants[1, "Length-weight_parameter_b"])
-
-    # cv
-    out@CV_Dt <- doc$cv[1, "depletion_over_time"]
-    out@CV_AvC <- doc$cv[1, "avg_catch_over_time"]
-    out@CV_Ind <- doc$cv[1, "abundance_index"]
-    out@CV_Mort <- doc$cv[1, "M"]
-    out@CV_FMSY_M <- null_to_na(doc$cv[1, "FMSY/M"])
-    out@CV_BMSY_B0 <- null_to_na(doc$cv[1, "BMSY/B0"])
-    out@CV_Dep <- doc$cv[1, "current_stock_depletion"]
-    out@CV_Abun <- doc$cv[1, "current_stock_abundance"]
-    out@CV_vbK <- doc$cv[1, "Von_Bertalanffy_K"]
-    out@CV_vbLinf <- doc$cv[1, "Von_Bertalanffy_Linf"]
-    out@CV_vbt0 <- doc$cv[1, "Von_Bertalanffy_t0"]
-    out@CV_L50 <- doc$cv[1, "length_at_50pc_maturity"]
-    out@CV_LFC <- doc$cv[1, "length_at_first_capture"]
-    out@CV_LFS <- doc$cv[1, "length_at_full_selection"]
-    out@CV_wla <- null_to_na(doc$cv[1, "Length-weight_parameter_a"])
-    out@CV_wlb <- null_to_na(doc$cv[1, "Length-weight_parameter_b"])
-    # TODO: No equivalent for "Imprecision in length composition data"?
-
-    out@MaxAge <- doc$constants[1, "maximum_age"]
-
-    # catch-at-length
-    out@CAL_bins <- unlist(doc$cal[1,])  # The "Min Length" row
-    out@CAL <- array(
-        # Flatten everything apart from the first row of cal into a vector
-        do.call(c, doc$cal[2:nrow(doc$cal),]),
-        dim = c(
-            # nsim
-            1,
-            # nyears
-            nrow(doc$cal) - 1,
-            # MaxAge
-            ncol(doc$cal)))
-
-    # TAC - The calculated catch limits (function TAC)
-    # Sense - The results of the sensitivity analysis
-    out@Units <- 'tonnes'
-
-    out@Ref <- doc$constants[1, "ref_ofl_limit"]  # TODO: Not entirely convinced
-
-    out@Cref <- doc$constants[1, "MSY"]
-    out@Bref <- doc$constants[1, "BMSY"]
-
-    return(out)
+ffdb_to_dlmtool <- function (document_name, instance = 'ffdb.farfish.eu') {
+    f <- tempfile(fileext = ".csv")
+    ffdb_to_dlmtool_csv(document_name, output = f, instance = instance)
+    DLMtool::XL2Data(f)
+    unlink(f)
 }
 
 # Example:
