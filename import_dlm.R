@@ -62,7 +62,12 @@ ffdb_to_dlmtool_csv <- function (document_name, output = stdout(), instance = 'f
     write_line('Length at 95% maturity', as.numeric(null_to_na(doc$constants[1, "length_at_95pc_maturity"])))
     write_line('Length at first capture', as.numeric(null_to_na(doc$constants[1, "length_at_first_capture"])))
     write_line('Length at full selection', as.numeric(null_to_na(doc$constants[1, "length_at_full_selection"])))
-    write_line('CAA', as.numeric(NA))  # TODO: What's the format of this?
+    for (r in rownames(doc$caa)) {
+        write_line(paste('CAA', r), as.numeric(doc$caa[r,]))
+    }
+    for (r in rownames(doc$cal)) {
+        write_line(ifelse(r == "Min Length", "CAL_bins",paste('CAL', r)), as.numeric(doc$cal[r,]))
+    }
     write_line('Current stock depletion', as.numeric(null_to_na(doc$constants[1, "current_stock_depletion"])))
     write_line('Current stock abundance', as.numeric(null_to_na(doc$constants[1, "current_stock_abundance"])))
     write_line('Von Bertalanffy K parameter', as.numeric(null_to_na(doc$constants[1, "Von_Bertalanffy_K"])))
@@ -94,7 +99,6 @@ ffdb_to_dlmtool_csv <- function (document_name, output = stdout(), instance = 'f
     write_line('Units', 'metric tonnes')
     write_line('Reference OFL', as.numeric(NA))
     write_line('Reference OFL type', as.numeric(NA))
-    write_line('CAL_bins', as.numeric(NA))
     write_line('MPrec', as.numeric(NA))
     write_line('LHYear', as.numeric(null_to_na(rownames(doc$catch)[[length(rownames(doc$catch))]])))
 }
