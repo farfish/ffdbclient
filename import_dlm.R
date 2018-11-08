@@ -107,4 +107,4 @@ ffdb_to_dlmtool <- function (document_name, instance = 'ffdb.farfish.eu') {
 }
 
 # Example:
-ffdb_to_dlmtool('cape_verde_blue_shark_example')
+# ffdb_to_dlmtool('cape_verde_blue_shark_example')
