@@ -102,8 +102,9 @@ ffdb_to_dlmtool_csv <- function (document_name, output = stdout(), instance = 'f
 ffdb_to_dlmtool <- function (document_name, instance = 'ffdb.farfish.eu') {
     f <- tempfile(fileext = ".csv")
     ffdb_to_dlmtool_csv(document_name, output = f, instance = instance)
-    DLMtool::XL2Data(f)
+    d <- DLMtool::XL2Data(f)
     unlink(f)
+    return(d)
 }
 
 # Example:
