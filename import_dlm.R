@@ -62,11 +62,17 @@ ffdb_to_dlmtool_csv <- function (document_name, output = stdout(), instance = 'f
     write_line('Length at 95% maturity', as.numeric(null_to_na(doc$constants[1, "length_at_95pc_maturity"])))
     write_line('Length at first capture', as.numeric(null_to_na(doc$constants[1, "length_at_first_capture"])))
     write_line('Length at full selection', as.numeric(null_to_na(doc$constants[1, "length_at_full_selection"])))
-    for (r in rownames(doc$caa)) {
-        write_line(paste('CAA', r), as.numeric(doc$caa[r,]))
+    if (!all(is.na(doc$caa))) {
+        for (r in rownames(doc$caa)) {
+            write_line(paste('CAA', r), as.numeric(doc$caa[r,]))
+        }
     }
-    for (r in rownames(doc$cal)) {
-        write_line(ifelse(r == "Min Length", "CAL_bins",paste('CAL', r)), as.numeric(doc$cal[r,]))
+    if (!all(is.na(doc$cal))) {
+        for (r in rownames(doc$cal)) {
+            write_line(ifelse(r == "Min Length", "CAL_bins",paste('CAL', r)), as.numeric(doc$cal[r,]))
+        }
+    } else {
+        write_line("CAL_bins", "")
     }
     write_line('Current stock depletion', as.numeric(null_to_na(doc$constants[1, "current_stock_depletion"])))
     write_line('Current stock abundance', as.numeric(null_to_na(doc$constants[1, "current_stock_abundance"])))
